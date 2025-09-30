@@ -3,18 +3,20 @@ import pandas as pd
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 
-def scrape_monapart_barcelona(output_csv="monapart_barcelona_agentes.csv"):
+def scrape_monapart(city: str):
     # Configuración de Selenium en modo headless
     options = Options()
     options.add_argument("--headless")
     options.add_argument("--disable-gpu")
     options.add_argument("--no-sandbox")
-
+    city = city.lower()
     driver = webdriver.Chrome(options=options)
-    driver.get("https://www.monapart.com/agentes/madrid")
+    driver.get(f'https://www.monapart.com/agentes/{city}')
 
-    time.sleep(5)  # esperar a que cargue
+    WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.CSS_SELECTOR, 'a.mon-link.link-primary')))
     print('cargado')
 
     # Enlaces de los agentes
@@ -27,7 +29,7 @@ def scrape_monapart_barcelona(output_csv="monapart_barcelona_agentes.csv"):
 
     for link in agent_links:
         driver.get(link)
-        time.sleep(5) # esperar
+        WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.CSS_SELECTOR, "a[href^='mailto:']")))
 
         # Extraer datos
         try:
@@ -73,9 +75,10 @@ def scrape_monapart_barcelona(output_csv="monapart_barcelona_agentes.csv"):
 
     # Guardar CSV
     df = pd.DataFrame(data)
-    df.to_csv(output_csv, index=False, encoding="utf-8")
-    print(f"Archivo CSV creado: {output_csv}")
+    file_path = f'../monapart/{city}.csv'
+    df.to_csv(file_path, index=False, encoding="utf-8")
+    print(f"Archivo CSV creado: {file_path}")
 
 
 if __name__ == "__main__":
-    scrape_monapart_barcelona(output_csv='monapart_madrid.csv')
+    scrape_monapart(city='Madrid')
