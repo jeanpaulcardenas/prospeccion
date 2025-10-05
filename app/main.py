@@ -1,5 +1,6 @@
 import requests
 import pandas as pd
+from config import _PLACES_API_KEY
 
 # TODO: error handling for code:400 response['error']['message'] .... 'Request contains an invalid argument.'
 
@@ -111,7 +112,7 @@ class NewPlacesDriverSpain:
 
 
 print(NewPlacesDriverSpain.agency_dflt_format)
-driver = NewPlacesDriverSpain('AIzaSyCy8haMZAgBxtuMfQZgdwdl9P72I50PffI')
+driver = NewPlacesDriverSpain(_PLACES_API_KEY)
 zip_codes_mallorca = ['39100']
 df = driver.agencies_in_city(city='bolzano', zip_codes=zip_codes_mallorca)
 print(df.info())

@@ -4,7 +4,6 @@ import os
 
 load_dotenv()
 _PLACES_API_KEY = os.getenv('PLACES_NEW_API_KEY')
-print(_PLACES_API_KEY)
 _INCLUDED_TYPE = 'real_estate_agency'
 _BASE_URL = 'https://places.googleapis.com/v1/places:searchText'
 INCLUDE_NON_PHYSICAL_BUSINESS = True
