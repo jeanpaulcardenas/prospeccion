@@ -1,22 +1,12 @@
 import requests
 import pandas as pd
-from app.helpers import list_to_comma_separated_string
-from config import _PLACES_API_KEY, _INCLUDED_TYPE, INCLUDE_NON_PHYSICAL_BUSINESS, _BASE_URL, _query, \
-    _FIELDS, _headers, _DEFAULT_LANGUAGE
-import openpyxl
-import time
-
-CITY = 'Fuerteventura'
-COUNTRY = 'España'
-ZIP_CODES = []
-
 
 # TODO: error handling for code:400 response['error']['message'] .... 'Request contains an invalid argument.'
 
 class NewPlacesDriverSpain:
     _TEXT_QUERY = 'agencia inmobiliaria en {0}, {1}, {2}'
-    _DFLT_LANGUAGE = 'es'
-    _COUNTRY = 'España'
+    _DFLT_LANGUAGE = 'it'
+    _COUNTRY = 'Italia'
     _DFLT_PAGE_SIZE = 60
     _INCLUDED_TYPE = 'real_estate_agency'
     _FIELDS = ('places.displayName', 'places.formattedAddress', 'places.rating', 'places.internationalPhoneNumber',
@@ -122,6 +112,7 @@ class NewPlacesDriverSpain:
 
 print(NewPlacesDriverSpain.agency_dflt_format)
 driver = NewPlacesDriverSpain('AIzaSyCy8haMZAgBxtuMfQZgdwdl9P72I50PffI')
-df = driver.agencies_in_city(city='Paterna, Valencia', zip_codes=['46980'])
+zip_codes_mallorca = ['39100']
+df = driver.agencies_in_city(city='bolzano', zip_codes=zip_codes_mallorca)
 print(df.info())
 
