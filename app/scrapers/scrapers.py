@@ -103,33 +103,36 @@ class RemaxScraper:
         'contact_number': 'a[href^="tel:"]',
         'e-mail': 'a[href^="mailto:"]',
         'next_page': 'ul.pagination a.arrow-next',
-        'aget_page_link': 'span.nombre_agente a'
+        'agent_page_link': 'span.nombre_agente a'
     }
 
     def __init__(self, city: str = ''):
         """city debe ser la ciudad. Puede ser aceptado ciudades como Madrid, Barcelona, etc y en en caso de querer
         municipios o sub regiones dentro de una ciudad de la forma 'madrid/majadaonda'"""
 
-        self.driver = webdriver.Chrome(RemaxScraper._options)
+        self.driver = webdriver.Chrome(self._options)
         self.city = city.lower()
-        self.base_url = RemaxScraper._BASE_URL + self.city
+        self.page = 'remax'
+        self.base_url = self._BASE_URL + self.city
         print(self.base_url)
         self.driver.get(self.base_url)
-        wait_css_located(self.driver, css_selector=RemaxScraper._CSS_SELECTORS['agent_page_link'])
+        wait_css_located(self.driver, css_selector=self._CSS_SELECTORS['agent_page_link'])
         self.agents = []
         self.agents_df = pd.DataFrame()
 
     def _get_page_agent_links(self):
         try:
-            anchors = self.driver.find_elements(By.CSS_SELECTOR, RemaxScraper._CSS_SELECTORS['agent_page_link'])
+            time.sleep(2)
+            anchors = self.driver.find_elements(By.CSS_SELECTOR, self._CSS_SELECTORS['agent_page_link'])
             links = [a.get_attribute('href') for a in anchors]
+            print(links)
             return links
         except TimeoutException as e:
             print(e)
             return []
 
     def _get_agent_info(self):
-        css_selects = RemaxScraper._CSS_SELECTORS
+        css_selects = self._CSS_SELECTORS
         try:
             agent = {
                 'lead_name':
@@ -137,15 +140,16 @@ class RemaxScraper:
                 'url': self.driver.current_url,
                 'address':
                     self.driver.find_element(By.CSS_SELECTOR, css_selects['address']).text.strip(),
-                'role':
-                    self.driver.find_element(By.CSS_SELECTOR, css_selects['rolle']).text.strip(),
-                'agency':
-                    self.driver.find_element(By.CSS_SELECTOR, css_selects['agency']).text.strip(),
+                # 'role':
+                #     self.driver.find_element(By.CSS_SELECTOR, css_selects['role']).text.strip(),
+                # 'agency':
+                #     self.driver.find_element(By.CSS_SELECTOR, css_selects['agency']).text.strip(),
                 'contact_number':
                     self.driver.find_element(By.CSS_SELECTOR,
                                              css_selects['contact_number']).get_attribute('href').replace('tel:', ''),
-                'e-mail': self.driver.find_element(By.CSS_SELECTOR,
-                                                   css_selects['e-mail']).get_attribute('href').replace('mailto:', '')
+                'e-mail': '',
+                # 'e-mail': self.driver.find_element(By.CSS_SELECTOR,
+                #                                    css_selects['e-mail']).get_attribute('href').replace('mailto:', '')
             }
             agent['contact_name'] = agent['lead_name']
             print(agent)
@@ -158,7 +162,7 @@ class RemaxScraper:
         for link in agent_links:
             self.driver.get(link)
             try:
-                wait_css_located(self.driver, RemaxScraper._CSS_SELECTORS['lead_name'])
+                wait_css_located(self.driver, self._CSS_SELECTORS['lead_name'])
                 self.agents.append(self._get_agent_info())
             except TimeoutException as e:
                 print(e)
@@ -166,9 +170,9 @@ class RemaxScraper:
     def _find_next_page_link(self):
         try:
             print(self.driver.current_url)
-            elem = self.driver.find_element(By.CSS_SELECTOR, RemaxScraper._CSS_SELECTORS['next_page'])
+            elem = self.driver.find_element(By.CSS_SELECTOR, self._CSS_SELECTORS['next_page'])
             print(elem)
-            next_page_url = self.base_url.rstrip('/?page=119') + '/?page=' + elem.get_attribute('data-href')
+            next_page_url = self.base_url.rstrip('/') + '/?page=' + elem.get_attribute('data-href')
             print(f'found next page:\n{next_page_url}')
             return next_page_url
 
@@ -180,45 +184,67 @@ class RemaxScraper:
         k = 0
         while True:
             k += 1
+            print('getting next page link')
             next_page_link = self._find_next_page_link()
-            print(next_page_link)
+
             if k > 130:
-                raise 'too mane k'
+                raise Exception('too mane k')
             if k % 10 == 0:
-                time.sleep(60)
-                self.get_agents_df()
+                time.sleep(2)
+                self.get_agents_df(directory=self.page)
             agent_links = self._get_page_agent_links()
             self._page_scraper(agent_links)
-
+            print('page scrapped')
             if not next_page_link:
                 break
+            print('accessing')
             self.driver.get(next_page_link)
+            print('accessed')
             try:
-                wait_css_located(self.driver, css_selector=RemaxScraper._CSS_SELECTORS['agent_page_link'])
+                wait_css_located(self.driver, css_selector=self._CSS_SELECTORS['agent_page_link'])
             except TimeoutException as e:
                 print(f'time out: \n{e}')
                 break
 
-    def get_agents_df(self):
+    def get_agents_df(self, directory: str):
         df = pd.DataFrame(self.agents)
-        df.to_csv(f'C:/Users/Jean/Desktop/prospeccion/remax/last_3_pages.csv', index=False)
+        df.to_csv(f'C:/Users/Jean/Desktop/prospeccion/{directory}/all{self.city}.csv', index=False)
         return df
 
 
-class SaftiScraper:
-    def __init__(self, city: str = ''):
-        super().__init__(self, city)
-
+class SaftiScraper(RemaxScraper):
     _CSS_SELECTORS = {
-        'lead_name':  'h1:has(span[data-testid="minisite-agent-specialized-sector"]) > span:first-child',
-        'address':  'h1:has(span[data-testid="minisite-agent-specialized-sector"]) > span:nth-child(3)',
-        'contact_number': 'a[data-testid="minisite_tetiere-phone-button"',
+        'lead_name': 'h1:has(span[data-testid="minisite-agent-specialized-sector"]) > span:first-child',
+        'address': 'h1:has(span[data-testid="minisite-agent-specialized-sector"]) > span:nth-child(3)',
+        'contact_number': 'a[data-testid="minisite_tetiere-phone-button"]',
         'e-mail': 'a[data-testid=minisite_tetiere-mail-button',
-        'next_page': 'a.abtasty-pagination-next'
+        'next_page': 'a.abtasty-pagination-next',
+        'agent_page_link': 'a[data-testid="agent-card-name"]',
     }
+    _BASE_URL = 'https://www.safti.es/encontrar-un-asesor'
+
+    def __init__(self, city: str = ''):
+        super().__init__(city)
+        self.base_url = SaftiScraper._BASE_URL
+        self.page = 'safti'
+
+    def _find_next_page_link(self):
+        try:
+            print(self.driver.current_url)
+            elem = self.driver.find_element(By.CSS_SELECTOR, self._CSS_SELECTORS['next_page'])
+            print(elem)
+            next_page_url = elem.get_attribute('href')
+            print(f'found next page:\n{next_page_url}')
+            return next_page_url
+
+        except Exception as e:
+            print(f'error is:\n{e}')
+            return None
 
 
 if __name__ == "__main__":
+    safti_driver = SaftiScraper()
+    safti_driver.get_all_agents()
     pass
     # scrape_monapart(city=)
     # remax_driver = RemaxScraper('?page=119')

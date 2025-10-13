@@ -3,12 +3,13 @@ import pandas as pd
 from config import _PLACES_API_KEY
 
 # TODO: error handling for code:400 response['error']['message'] .... 'Request contains an invalid argument.'
-
+# TODO: delete agencies with 'holidays' or 'vacation' and such in agency name 'apartments' 'stays' 'rental'
+# TODO: Delete ?utm from links (keep just base url)
 class NewPlacesDriverSpain:
-    _TEXT_QUERY = 'agencia inmobiliaria en {0}, {1}, {2}'
-    _DFLT_LANGUAGE = 'it'
-    _COUNTRY = 'Italia'
-    _DFLT_PAGE_SIZE = 60
+    _TEXT_QUERY = 'real estate agency in {0}, {1}, {2}'
+    _DFLT_LANGUAGE = 'en'
+    _COUNTRY = 'spain'
+    _DFLT_PAGE_SIZE = 80
     _INCLUDED_TYPE = 'real_estate_agency'
     _FIELDS = ('places.displayName', 'places.formattedAddress', 'places.rating', 'places.internationalPhoneNumber',
                'places.nationalPhoneNumber', 'places.userRatingCount', 'places.websiteUri', 'nextPageToken')
@@ -59,7 +60,7 @@ class NewPlacesDriverSpain:
         headers = self.headers()
         print(headers)
         response = requests.post(url=self._TEXT_QUERY_BASE_URL, json=body, headers=headers)
-        print(response.json())
+        print(response.json()['places'])
         return dict(response.json())
 
     def full_text_search_request(self, zip_codes, city, **kwargs) -> list[dict]:
@@ -113,7 +114,6 @@ class NewPlacesDriverSpain:
 
 print(NewPlacesDriverSpain.agency_dflt_format)
 driver = NewPlacesDriverSpain(_PLACES_API_KEY)
-zip_codes_mallorca = ['39100']
-df = driver.agencies_in_city(city='bolzano', zip_codes=zip_codes_mallorca)
+zip_codes = ['0' + str(x) for x in range(3501, 3504)]
+df = driver.agencies_in_city(city='Benidorm', zip_codes=zip_codes)
 print(df.info())
-
