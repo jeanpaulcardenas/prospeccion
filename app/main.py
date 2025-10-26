@@ -114,6 +114,6 @@ class NewPlacesDriverSpain:
 
 print(NewPlacesDriverSpain.agency_dflt_format)
 driver = NewPlacesDriverSpain(_PLACES_API_KEY)
-zip_codes = ['0' + str(x) for x in range(3501, 3504)]
-df = driver.agencies_in_city(city='Benidorm', zip_codes=zip_codes)
+zip_codes = ['0' + str(x) for x in range(3501)]
+df = driver.agencies_in_city(city='Benidorm_trying', zip_codes=zip_codes)
 print(df.info())

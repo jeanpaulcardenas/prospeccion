@@ -243,9 +243,7 @@ class SaftiScraper(RemaxScraper):
 
 
 if __name__ == "__main__":
-    safti_driver = SaftiScraper()
-    safti_driver.get_all_agents()
-    pass
+    'as'
     # scrape_monapart(city=)
     # remax_driver = RemaxScraper('?page=119')
     # print(remax_driver._get_page_agent_links())
