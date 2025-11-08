@@ -4,13 +4,38 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="7a7a723c-0b72-4f88-a89f-43f0c016d1ed" name="Changes" comment="second">
+    <list default="true" id="7a7a723c-0b72-4f88-a89f-43f0c016d1ed" name="Changes" comment="not much">
+      <change afterPath="$PROJECT_DIR$/app/LLM/ai_fill_data.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/LLM/llm_integration.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/positioning/gadm41_ESP_3.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/positioning/geo_coordinates.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/scrapers/codigos_postales.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/scrapers/remax_scraper.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.env" beforeDir="false" afterPath="$PROJECT_DIR$/.env" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/by_position.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/by_position.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/config.py" beforeDir="false" afterPath="$PROJECT_DIR$/config.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/monapart_barcelona_agentes.csv" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/monapart_madrid.csv" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/result_test_1.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/scrapers/scrapers.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/scrapers/scrapers.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/italy.Firenze.csv" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/italy.Firenze_2.csv" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/italy.Torino.csv" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/spain/Granada.csv" beforeDir="false" afterPath="$PROJECT_DIR$/spain/Granada.csv" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Python Script" />
+      </list>
+    </option>
   </component>
   <component name="Git.Settings">
     <option name="RECENT_BRANCH_BY_REPOSITORY">
@@ -27,8 +52,145 @@
   <component name="MarkdownSettingsMigration">
     <option name="stateVersion" value="1" />
   </component>
+  <component name="ProjectId" id="33PxMGJbEcuOw8G06kdTUZd2K6x" />
   <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable&quot;
+  }
+}</component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\Jean\Desktop\prospeccion\app\LLM" />
+      <recent name="C:\Users\Jean\Desktop\prospeccion\app" />
+      <recent name="C:\Users\Jean\Desktop\prospeccion" />
+      <recent name="C:\Users\Jean\Desktop\prospeccion\app\scrapers" />
+      <recent name="C:\Users\Jean\Desktop\prospeccion\app\positioning" />
+    </key>
+  </component>
+  <component name="RunManager">
+    <configuration name="main" type="PythonConfigurationType" factoryName="Python" nameIsGenerated="true">
+      <module name="prospeccion" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/app" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/app/main.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="project-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
+    <task id="LOCAL-00001" summary="{alot of class added} &#10;just know realised we have no interpreter">
+      <created>1759189761311</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1759189761311</updated>
+    </task>
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="7a7a723c-0b72-4f88-a89f-43f0c016d1ed" name="Changes" comment="{alot of class added} &#10;just know realised we have no interpreter" />
+      <created>1759232459904</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1759232459904</updated>
+    </task>
+    <task id="LOCAL-00002" summary="class works">
+      <created>1759240814258</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1759240814258</updated>
+    </task>
+    <task id="LOCAL-00003" summary="{dynamic time wait added}">
+      <created>1759262011428</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1759262011428</updated>
+    </task>
+    <task id="LOCAL-00004" summary="{file_path fixed}">
+      <created>1759262030939</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1759262030939</updated>
+    </task>
+    <task id="LOCAL-00005" summary="{refactored}">
+      <created>1759262201073</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1759262201073</updated>
+    </task>
+    <task id="LOCAL-00006" summary="{remax scraper entirely built}">
+      <created>1759700024237</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1759700024237</updated>
+    </task>
+    <task id="LOCAL-00007" summary="{removing unused variables}">
+      <created>1759700122702</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1759700122702</updated>
+    </task>
+    <task id="LOCAL-00008" summary="{making api key secure}">
+      <created>1759700222612</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1759700222612</updated>
+    </task>
+    <task id="LOCAL-00009" summary="{many changes}">
+      <created>1759704323472</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1759704323472</updated>
+    </task>
+    <task id="LOCAL-00010" summary="{many changes}">
+      <created>1760376344741</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1760376344741</updated>
+    </task>
+    <task id="LOCAL-00011" summary="not much">
+      <created>1761515041679</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL-00011" />
+      <option name="project" value="LOCAL" />
+      <updated>1761515041679</updated>
+    </task>
+    <task id="LOCAL-00012" summary="not much">
+      <created>1761515052673</created>
+      <option name="number" value="00012" />
+      <option name="presentableId" value="LOCAL-00012" />
+      <option name="project" value="LOCAL" />
+      <updated>1761515052673</updated>
+    </task>
+    <option name="localTasksCounter" value="13" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -41,5 +203,18 @@
         </entry>
       </map>
     </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="{alot of class added} &#10;just know realised we have no interpreter" />
+    <MESSAGE value="class works" />
+    <MESSAGE value="{dynamic time wait added}" />
+    <MESSAGE value="{file_path fixed}" />
+    <MESSAGE value="{refactored}" />
+    <MESSAGE value="{remax scraper entirely built}" />
+    <MESSAGE value="{removing unused variables}" />
+    <MESSAGE value="{making api key secure}" />
+    <MESSAGE value="{many changes}" />
+    <MESSAGE value="not much" />
+    <option name="LAST_COMMIT_MESSAGE" value="not much" />
   </component>
 </project>

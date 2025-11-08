@@ -1,3 +1,4 @@
+import logging
 import time
 import pandas as pd
 from selenium import webdriver
@@ -241,6 +242,50 @@ class SaftiScraper(RemaxScraper):
             print(f'error is:\n{e}')
             return None
 
+    class ApiValencia:
+        def __init__(self, city: str):
+            self.city = city.lower()
+
+
+class ZipCodeScraper:
+    BASE_URL = 'https://codigospostales.com/nestcp.cgi'
+    css_base_locator = 'li.grande'
+
+    def __init__(self, provincia: str, provincia_zip_code: str):
+        """Crear un driver para buscar zip codes en codigospostales.com. provincia_zip_code son los dos
+        dígitos del código postal que definen la provincia"""
+
+        self.logger = logging.Logger(self.__class__.__name__, logging.INFO)
+        logging.basicConfig(format='%(asctime)s %(levelname)s %(message)s')
+        self.provincia = provincia
+        self.base_zip: str = provincia_zip_code if len(provincia_zip_code) == 2 else ''
+        self.url: str = self.BASE_URL + self.base_zip
+        self.driver = webdriver.Chrome(options=default_options())
+        self.set_url()
+
+    def set_url(self):
+        if self.base_zip:
+            try:
+                self.driver.get(self.BASE_URL + '?' + self.base_zip)
+                wait_css_located(self.driver, self.css_base_locator)
+                self.logger.info(f'accedido a url {self.url}')
+            except Exception as e:
+                self.logger.info(f'error accessing url {self.url}: \nerror message {e}')
+
+        else:
+            raise ValueError('base zip code not valid. base zip code must be 2 digits')
+
+    def get_zip_codes(self):
+        elements = self.driver.find_elements(By.CSS_SELECTOR, 'ul.grande li.grande > a')
+        print(self.driver.current_url)
+        codes = [code.get_attribute('textContent') for code in elements]
+        print(codes)
+        return codes
+
+    class Idealista:
+        def __init__(self, city):
+            pass
+
 
 if __name__ == "__main__":
     'as'
@@ -255,3 +300,32 @@ if __name__ == "__main__":
     # df_3 = pd.concat([df, df_2], ignore_index=True)
     # df_3.drop_duplicates(inplace=True)
     # df_3.to_csv('C:/Users/Jean/Desktop/prospeccion/remax/all_agents.csv')
+    # ZipCodeScraper('Burgos', '09').get_zip_codes()
+
+
+def get_contacts_url(driver: webdriver, base_url: str) -> str:
+    """Driver should be already set in the base url"""
+    if driver.current_url != base_url:
+        driver.get(base_url)
+        time.sleep(2)
+    # check here if url exists
+    major_pages = ['idealista', 'fotocasa', 'iadespana', 'safti', 'remax']
+    has_own_page = not any([page in base_url for page in major_pages])
+    if not has_own_page:
+        print('has website in Idealista or Fotocasa or other')
+    if has_own_page:
+        elements = driver.find_elements(By.CSS_SELECTOR, 'a[href]')
+        hrefs = [a.get_attribute('href') for a in elements]
+        print(hrefs)
+        possible_contact_url_suffixes = ['contact', 'contacts', 'contacto', 'contactos', 'contacta','contactar']
+        if not hrefs:
+            return base_url
+        for link in hrefs:
+            if any([suffix in link for suffix in possible_contact_url_suffixes]):
+                print(f'contact page found: {link}')
+                return link
+        else:
+            print('contact page not found, using base url')
+            return base_url
+
+

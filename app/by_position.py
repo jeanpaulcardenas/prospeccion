@@ -2,7 +2,6 @@ import requests
 import time
 from shapely.geometry import Point, shape
 from config import _PLACES_API_KEY
-import math
 
 # ========== CONFIG ==========
 CITY_NAME = "Cordoba"

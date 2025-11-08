@@ -1,9 +1,11 @@
 from dotenv import load_dotenv
-from helpers import list_to_comma_separated_string
+from app.helpers import list_to_comma_separated_string
 import os
 
 load_dotenv()
 _PLACES_API_KEY = os.getenv('PLACES_NEW_API_KEY')
+_OPEN_AI_PERSONAL_KEY = os.getenv('OPEN_AI_PERSONAL_KEY')
+_SPIDER_API_KEY = os.getenv('SPIDER_CLOUD_KEY')
 _INCLUDED_TYPE = 'real_estate_agency'
 _BASE_URL = 'https://places.googleapis.com/v1/places:searchText'
 INCLUDE_NON_PHYSICAL_BUSINESS = True

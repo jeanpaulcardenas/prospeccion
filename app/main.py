@@ -1,20 +1,22 @@
 import requests
 import pandas as pd
 from config import _PLACES_API_KEY
+from scrapers.scrapers import ZipCodeScraper
 
 # TODO: error handling for code:400 response['error']['message'] .... 'Request contains an invalid argument.'
 # TODO: delete agencies with 'holidays' or 'vacation' and such in agency name 'apartments' 'stays' 'rental'
 # TODO: Delete ?utm from links (keep just base url)
 class NewPlacesDriverSpain:
-    _TEXT_QUERY = 'real estate agency in {0}, {1}, {2}'
-    _DFLT_LANGUAGE = 'en'
-    _COUNTRY = 'spain'
+    _TEXT_QUERY = 'agencia inmobiliaria en {0}, {1}, {2}'
+    _DFLT_LANGUAGE = 'es'
+    _COUNTRY = 'España'
     _DFLT_PAGE_SIZE = 80
     _INCLUDED_TYPE = 'real_estate_agency'
     _FIELDS = ('places.displayName', 'places.formattedAddress', 'places.rating', 'places.internationalPhoneNumber',
                'places.nationalPhoneNumber', 'places.userRatingCount', 'places.websiteUri', 'nextPageToken')
     _TEXT_QUERY_BASE_URL = 'https://places.googleapis.com/v1/places:searchText'
-    _DFLT_KEY_VALUES = ('name', 'address', 'international_phone_number', 'url', 'rating', 'reviews_count', 'language')
+    _DFLT_KEY_VALUES = ('name', 'address', 'international_phone_number', 'url', 'rating', 'reviews_count', 'language',
+                        'comment')
     agency_dflt_format = {key: [] for key in _DFLT_KEY_VALUES}
 
     def __init__(self, api_key: str, ):
@@ -53,15 +55,17 @@ class NewPlacesDriverSpain:
             body['pageToken'] = token
         return body
 
-    def text_search_request(self, zip_code: str, city: str, **kwargs) -> dict:
+    def text_search_request(self, zip_code: str, city: str, **kwargs) -> dict | None:
         """Returns a dict (json) with keys 'places' (list of dicts with place info) and 'nextPageToken'"""
 
         body = self.body(postal_code=zip_code, city=city, **kwargs)
         headers = self.headers()
-        print(headers)
         response = requests.post(url=self._TEXT_QUERY_BASE_URL, json=body, headers=headers)
-        print(response.json()['places'])
-        return dict(response.json())
+        print(response.json().get('places'))
+        if response.json().get('places'):
+            return dict(response.json())
+        else:
+            return None
 
     def full_text_search_request(self, zip_codes, city, **kwargs) -> list[dict]:
         places = []
@@ -69,7 +73,8 @@ class NewPlacesDriverSpain:
         for zip_code in zip_codes:
             while True:
                 response = self.text_search_request(zip_code, city, token=token, **kwargs)
-                places += response['places']
+                if response:
+                    places += response['places']
                 token = response.get('nextPageToken', '')
                 if not token:
                     break
@@ -86,8 +91,10 @@ class NewPlacesDriverSpain:
             agencies['rating'].append(place.get('rating'))
             agencies['url'].append(place.get('websiteUri'))
             agencies['reviews_count'].append(place.get('userRatingCount'))
-            agencies['international_phone_number'].append(place.get('internationalPhoneNumber'))
+            agencies['international_phone_number'].append(str(place.get('internationalPhoneNumber')))
             agencies['language'].append(place.get('displayName').get('languageCode'))
+            agencies['comment'].append("Google reviews: " + str(place.get('rating', '')) + '* / ' +
+                                       str(place.get('userRatingCount')))
         return agencies
 
     @staticmethod
@@ -102,9 +109,7 @@ class NewPlacesDriverSpain:
 
     def agencies_in_city(self, city, zip_codes, create_file: bool = True):
         places = self.full_text_search_request(city=city, zip_codes=zip_codes)
-        print(places)
         agencies = self.places_list_to_dict(places=places)
-        print(agencies)
         df = self.create_df(agencies)
         print(df)
         if create_file:
@@ -113,7 +118,9 @@ class NewPlacesDriverSpain:
 
 
 print(NewPlacesDriverSpain.agency_dflt_format)
+print()
 driver = NewPlacesDriverSpain(_PLACES_API_KEY)
-zip_codes = ['0' + str(x) for x in range(3501)]
-df = driver.agencies_in_city(city='Benidorm_trying', zip_codes=zip_codes)
+zip_codes = ZipCodeScraper('Zaragoza', provincia_zip_code='50').get_zip_codes()
+zip_codes = [str(x) for x in range(50001, 50023)] + ['50059', '50070', '50071', '50080', '50090', '50190']
+df = driver.agencies_in_city(city='Zaragoza', zip_codes=zip_codes)
 print(df.info())
