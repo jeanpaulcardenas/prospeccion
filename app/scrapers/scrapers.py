@@ -287,6 +287,37 @@ class ZipCodeScraper:
             pass
 
 
+def get_contacts_url(driver: webdriver, base_url: str) -> str:
+    """Driver should be already set in the base url"""
+    try:
+        if not base_url:
+            return ''
+        if driver.current_url != base_url:
+            driver.get(base_url)
+            time.sleep(2)
+        # check here if url exists
+        major_pages = ['idealista', 'fotocasa', 'iadespana', 'safti', 'remax']
+        has_own_page = not any([page in base_url for page in major_pages])
+        if not has_own_page:
+            print('has website in Idealista or Fotocasa or other')
+        if has_own_page:
+            elements = driver.find_elements(By.CSS_SELECTOR, 'a[href]')
+            hrefs = [a.get_attribute('href') for a in elements]
+            print(f'hrefs found in {base_url}: {len(hrefs)}')
+            possible_contact_url_suffixes = ['contact', 'contacts', 'contacto', 'contactos', 'contacta','contactar']
+            if not hrefs:
+                return base_url
+            for link in hrefs:
+                if any([suffix in link for suffix in possible_contact_url_suffixes]):
+                    print(f'contact page found: {link}')
+                    return link
+            else:
+                print('contact page not found, using base url')
+                return base_url
+    except Exception as e:
+        return ''
+
+
 if __name__ == "__main__":
     'as'
     # scrape_monapart(city=)
@@ -301,31 +332,3 @@ if __name__ == "__main__":
     # df_3.drop_duplicates(inplace=True)
     # df_3.to_csv('C:/Users/Jean/Desktop/prospeccion/remax/all_agents.csv')
     # ZipCodeScraper('Burgos', '09').get_zip_codes()
-
-
-def get_contacts_url(driver: webdriver, base_url: str) -> str:
-    """Driver should be already set in the base url"""
-    if driver.current_url != base_url:
-        driver.get(base_url)
-        time.sleep(2)
-    # check here if url exists
-    major_pages = ['idealista', 'fotocasa', 'iadespana', 'safti', 'remax']
-    has_own_page = not any([page in base_url for page in major_pages])
-    if not has_own_page:
-        print('has website in Idealista or Fotocasa or other')
-    if has_own_page:
-        elements = driver.find_elements(By.CSS_SELECTOR, 'a[href]')
-        hrefs = [a.get_attribute('href') for a in elements]
-        print(hrefs)
-        possible_contact_url_suffixes = ['contact', 'contacts', 'contacto', 'contactos', 'contacta','contactar']
-        if not hrefs:
-            return base_url
-        for link in hrefs:
-            if any([suffix in link for suffix in possible_contact_url_suffixes]):
-                print(f'contact page found: {link}')
-                return link
-        else:
-            print('contact page not found, using base url')
-            return base_url
-
-

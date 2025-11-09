@@ -1,9 +1,19 @@
+import logging
+
 from openai import OpenAI
 from config import _OPEN_AI_PERSONAL_KEY, _SPIDER_API_KEY
 import requests
 import json
 client = OpenAI(api_key=_OPEN_AI_PERSONAL_KEY)
 SPIDER_SCRAPE_URL = 'https://api.spider.cloud/scrape'
+
+open_ai_empty_return = {
+    'phone_1': '',
+    'phone_2': '',
+    'e-mail_1': '',
+    'e-mail_2': '',
+    'message': 'error:no webpage'
+}
 
 spider_headers = {
     'Authorization': f'Bearer {_SPIDER_API_KEY}',
@@ -17,15 +27,16 @@ GET_SA_AI_SYSTEM_CONTENT = """You are my scraper assistant. I just need you to f
                        name of a person as representative. sociedad if you find a sl or s.l. and in case you do find it 
                        do not include sl nor s.l."""
 
-GET_CONTACTS_AI_SYSTEM_CONTENT = """You are my scraper assistant. You will receive markdown of webpages as json string.
+GET_CONTACTS_AI_SYSTEM_CONTENT = f"""You are my scraper assistant. You will receive markdown of webpages as json string.
                               I will request you to get info to me from this pages. 
                               Must return answer as a dict as follows 
-                              {"phone_1": ,"phone_2: , "email_1": ,"e-mail_2", "message": },
-                              if you dont find a value for a key just return empty string ""                            
-                              where message can be "succes" if found or "error: {}" if couldnt find and inside brackets 
+                              {{"phone_1": ,"phone_2: , "e-mail_1": ,"e-mail_2", "message": }},
+                              case 1: You find atleast one value for phone or email: return it and message: 'success'
+                              case 2:  you dont find a value for any key: return {open_ai_empty_return} ""                            
+                              where message can be "succes" if found or "error:" if couldnt find and inside brackets 
                               short explanation of why couldnt find info. If there are many offices contacts return message:
                               'too many offices, not giving contacts to avoid misunderstanding' and return all 
-                              "phone_1": ,"phone_2: , "email_1": ,"e-mail_2" with emptyy string '', DO NOT RETURN VALUES 
+                              "phone_1": ,"phone_2: , "e-mail_1": ,"e-mail_2" with empty string '', DO NOT RETURN VALUES 
                               IN THIS CASE!"""
 
 
@@ -43,22 +54,30 @@ def spider_json_data(url: str)-> dict:
             'url': url}
 
 
-def open_ai_request(system_content: str, user_content: str, model: str = 'gpt-4o-mini') -> dict:
-    response = client.chat.completions.create(
-        model=model,
-        response_format={'type': 'json_object'},
-        messages=[{'role': 'system',
-                   'content': system_content},
-                  {'role': 'user',
-                   'content': user_content}]
-    )
-    values = response.choices[0].message.content
-    values = json.loads(values)
-
-    return values
+def open_ai_request(system_content: str, user_content: str | None, model: str = 'gpt-4o-mini') -> dict:
+    try:
+        if not user_content:
+            return open_ai_empty_return
+        response = client.chat.completions.create(
+            model=model,
+            response_format={'type': 'json_object'},
+            messages=[{'role': 'system',
+                       'content': system_content},
+                      {'role': 'user',
+                       'content': user_content}]
+        )
+        values = response.choices[0].message.content
+        values = json.loads(values)
+        print(values)
+        return values
+    except Exception as e:
+        print(f'ERROR OPEN AI REQUEST: {e}')
+        return open_ai_empty_return
 
 
 def make_md(url: str) -> str | None:
+    if not url:
+        return None
     json_data = spider_json_data(url)
 
     response = requests.post(url=SPIDER_SCRAPE_URL, headers=spider_headers, json=json_data)

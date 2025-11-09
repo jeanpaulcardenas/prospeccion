@@ -4,26 +4,13 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="7a7a723c-0b72-4f88-a89f-43f0c016d1ed" name="Changes" comment="not much">
-      <change afterPath="$PROJECT_DIR$/app/LLM/ai_fill_data.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/LLM/llm_integration.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/positioning/gadm41_ESP_3.json" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/positioning/geo_coordinates.json" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/scrapers/codigos_postales.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/scrapers/remax_scraper.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.env" beforeDir="false" afterPath="$PROJECT_DIR$/.env" afterDir="false" />
+    <list default="true" id="7a7a723c-0b72-4f88-a89f-43f0c016d1ed" name="Changes" comment="too much. cant explain">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/by_position.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/by_position.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/config.py" beforeDir="false" afterPath="$PROJECT_DIR$/config.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/LLM/ai_fill_data.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/LLM/ai_fill_data.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/LLM/llm_integration.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/LLM/llm_integration.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/main.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/monapart_barcelona_agentes.csv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/monapart_madrid.csv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/result_test_1.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/scrapers/codigos_postales.py" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/app/scrapers/scrapers.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/scrapers/scrapers.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/italy.Firenze.csv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/italy.Firenze_2.csv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/italy.Torino.csv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/spain/Granada.csv" beforeDir="false" afterPath="$PROJECT_DIR$/spain/Granada.csv" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -190,7 +177,14 @@
       <option name="project" value="LOCAL" />
       <updated>1761515052673</updated>
     </task>
-    <option name="localTasksCounter" value="13" />
+    <task id="LOCAL-00013" summary="too much. cant explain">
+      <created>1762624345289</created>
+      <option name="number" value="00013" />
+      <option name="presentableId" value="LOCAL-00013" />
+      <option name="project" value="LOCAL" />
+      <updated>1762624345289</updated>
+    </task>
+    <option name="localTasksCounter" value="14" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -215,6 +209,7 @@
     <MESSAGE value="{making api key secure}" />
     <MESSAGE value="{many changes}" />
     <MESSAGE value="not much" />
-    <option name="LAST_COMMIT_MESSAGE" value="not much" />
+    <MESSAGE value="too much. cant explain" />
+    <option name="LAST_COMMIT_MESSAGE" value="too much. cant explain" />
   </component>
 </project>
