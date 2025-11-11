@@ -30,9 +30,13 @@ class NewPlacesDriverSpain:
     agency_dflt_format = {key: [] for key in _DFLT_KEY_VALUES}
 
     def __init__(self, api_key: str):
-        self.deleted_by_address = 0
-        self.deleted_by_name_repeated = 0
-        self.deleted_by_bad_fit_name = 0
+        self.deleted = {
+            'by_address': 0,
+            'by_name_and_zc_rp': 0,
+            'by_bad_fit_name': 0,
+            'by_no_maps_data': 0,
+            'by_status': 0
+        }
         self.logger = logging.getLogger(self.__class__.__name__)
         if not self.logger.handlers:
             logging.basicConfig(level=logging.INFO, format='%(levelname)s %(name)s %(asctime)s %(message)s')
@@ -128,7 +132,7 @@ class NewPlacesDriverSpain:
                 agencies['rating'].append(place.get('rating'))
                 agencies['url'].append(place.get('websiteUri'))
                 agencies['reviews_count'].append(place.get('userRatingCount'))
-                agencies['maps_phone'].append(str(place.get('internationalPhoneNumber')))
+                agencies['maps_phone'].append(place.get('internationalPhoneNumber'))
                 agencies['language'].append(place.get('displayName').get('languageCode'))
                 agencies['comment'].append("Google reviews: " + str(place.get('rating', '')) + '* / ' +
                                            str(place.get('userRatingCount')))
@@ -136,7 +140,7 @@ class NewPlacesDriverSpain:
                 agencies['business_status'].append(place.get('businessStatus'))
             else:
                 print(f"deleted: {place.get('formattedAddress')}")
-                self.deleted_by_address += 1
+                self.deleted['by_address'] += 1
         return agencies
 
     @staticmethod
@@ -164,49 +168,53 @@ class NewPlacesDriverSpain:
     @staticmethod
     def keep_base_name(df: pd.DataFrame):
         """In-place formats name"""
-        print(df['name'].to_string())
         df['name'] = df['name'].apply(
             lambda x: re.split(r'[|,-]', x)[0] if (len(re.split(r'[|,-]', x)[0]) > 5 and len(x) > 30) else x)
 
     def add_zc_equal_names(self, df: pd.DataFrame) -> pd.DataFrame:
-        size_init = df.size
+        size_init = df.shape[0]
+        df = df.drop_duplicates(subset=['name', 'zip_code'])
         repeated = df['name'].duplicated(keep=False)
-        df.loc[repeated, 'name_zc'] = (df.loc[repeated, 'name'] + ' ( ' + df.loc[repeated, "zip_code"].astype(str) + ' )')
-        repeated_name_and_zc = df['name_zc'].duplicated(keep=False)
-        df.loc[repeated_name_and_zc, 'name'] = df.loc[repeated_name_and_zc, 'name_zc']
-        self.deleted_by_name_repeated = df.size - size_init
-        print(df['name'].to_string())
+        df.loc[repeated, 'name'] = (df.loc[repeated, 'name'] + ' ( ' + df.loc[repeated, "zip_code"].astype(str) + ' )')
+        self.deleted['by_name_and_zc_rp'] = size_init - df.shape[0]
         return df.drop_duplicates('name')
 
-    @staticmethod
-    def del_no_data_rows(df: pd.DataFrame) -> pd.DataFrame:
+    def del_no_data_rows(self, df: pd.DataFrame) -> pd.DataFrame:
+        i_rows = df.shape[0]
         mask = ((df['maps_phone'].isna() | (df['maps_phone'] == '')) & (df['url'].isna() | (df['url'] == '')))
+        self.deleted['by_no_maps_data'] = i_rows - df.shape[0]
         df = df[~mask]
         return df
 
     def del_bad_fit_names(self, df: pd.DataFrame):
         mask = (df['name'].apply(self.remove_accents).str.contains('|'.join(self._BAD_FIT_NAMES), case=False, na=False))
-        self.deleted_by_bad_fit_name = len(mask)
+        self.deleted['by_bad_fit_name'] = len(mask)
         df = df[~mask]
         return df
 
     def create_csv(self, city, df: pd.DataFrame):
         df.to_csv(f'../{self._COUNTRY}/{city.lower()}.csv', index=False)
 
+    def del_not_operational(self, df: pd.DataFrame):
+        maks = (df['business_status'] != 'OPERATIONAL')
+        self.deleted['by_status'] = len(maks)
+        return df[~maks]
+
     def agencies_in_city(self, city, zip_codes: list[str], create_file: bool = True, secondary_city_name=''):
         places = self.full_text_search_request(city=city, zip_codes=zip_codes)
         agencies = self.places_list_to_dict(places=places, city=city, sub_zones=zip_codes,
                                             secondary_city_name=secondary_city_name)
-        print(agencies)
         df = self.create_df(agencies)
         self.keep_base_name(df)
         self.create_zc_column(df)
         df = self.add_zc_equal_names(df)
-        print(df.head().to_string())
+        print(df.info)
         df = self.del_no_data_rows(df)
-        self.logger.info(f'deleted by miss match address: {self.deleted_by_address}')
-        self.logger.info(f'deleted by bad fit name: {self.deleted_by_bad_fit_name}')
-        self.logger.info(f'deleted by name and postal code repeated: {self.deleted_by_name_repeated}')
+        self.logger.info(f'deleted by miss match address: {self.deleted["by_address"]}')
+        self.logger.info(f'deleted by bad fit name: {self.deleted["by_bad_fit_name"]}')
+        self.logger.info(f'deleted by name and postal code repeated: {self.deleted["by_name_and_zc_rp"]}')
+        self.logger.info(f'deleted by no maps data: {self.deleted["by_no_maps_data"]}')
+        self.logger.info(f'delted by business status: {self.deleted["by_status"]}')
         if create_file:
             self.create_csv(city=city, df=df)
             self.logger.info(f'file created with name {city}')
@@ -214,7 +222,6 @@ class NewPlacesDriverSpain:
 
 
 print(NewPlacesDriverSpain.agency_dflt_format)
-print()
 driver = NewPlacesDriverSpain(_PLACES_API_KEY)
 zip_codes = ZipCodeScraper('Almería', provincia_zip_code='04').get_zip_codes()
 my_df = driver.agencies_in_city(city='Almería', zip_codes=zip_codes[:5])
