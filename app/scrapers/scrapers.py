@@ -308,7 +308,7 @@ def get_contacts_url(driver: webdriver, base_url: str) -> str:
             if not hrefs:
                 return base_url
             for link in hrefs:
-                if any([suffix in link for suffix in possible_contact_url_suffixes]):
+                if any([suffix in link.lower() for suffix in possible_contact_url_suffixes]):
                     print(f'contact page found: {link}')
                     return link
             else:

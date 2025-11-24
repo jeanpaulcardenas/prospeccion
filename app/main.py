@@ -3,8 +3,9 @@ import pandas as pd
 from config import _PLACES_API_KEY
 from scrapers.scrapers import ZipCodeScraper
 import logging
+import os
 import re
-import unicodedata # to make 'acento' insensitive
+import unicodedata  # to make 'acento' insensitive
 
 
 # TODO: error handling for code:400 response['error']['message'] .... 'Request contains an invalid argument.'
@@ -13,11 +14,11 @@ import unicodedata # to make 'acento' insensitive
 
 
 class NewPlacesDriverSpain:
-    _N_PLACES_FOUND_THEN_REPEAT = 60
+    _N_PLACES_FOUND_THEN_REPEAT = 60000
     _TEXT_QUERY = 'agencia inmobiliaria en {0}, {1}, {2}'
     _DFLT_LANGUAGE = 'es'
     _COUNTRY = 'España'
-    _DFLT_PAGE_SIZE = 60
+    _DFLT_PAGE_SIZE = str(20)
     _INCLUDED_TYPE = 'real_estate_agency'
     _FIELDS = ('places.displayName', 'places.formattedAddress', 'places.rating', 'places.internationalPhoneNumber',
                'places.types', 'places.nationalPhoneNumber', 'places.userRatingCount', 'places.websiteUri',
@@ -26,7 +27,7 @@ class NewPlacesDriverSpain:
     _DFLT_KEY_VALUES = ('name', 'address', 'maps_phone', 'url', 'rating', 'reviews_count', 'language',
                         'comment', 'business_status', 'types')
     _BAD_FIT_NAMES = ['alquiler', 'rent ', 'renta', 'rental', 'vacacional', 'vacaciones', 'holidays', 'mobile', 'industrial',
-                      'industriales', 'habitacion']
+                      'industriales', 'habitacion', 'apartamento']
     agency_dflt_format = {key: [] for key in _DFLT_KEY_VALUES}
 
     def __init__(self, api_key: str):
@@ -35,13 +36,15 @@ class NewPlacesDriverSpain:
             'by_name_and_zc_rp': 0,
             'by_bad_fit_name': 0,
             'by_no_maps_data': 0,
-            'by_status': 0
+            'by_status': 0,
+            'by_type': 0
         }
         self.logger = logging.getLogger(self.__class__.__name__)
         if not self.logger.handlers:
             logging.basicConfig(level=logging.INFO, format='%(levelname)s %(name)s %(asctime)s %(message)s')
         self._API_KEY = api_key
         self._agency_key_values = ['name']
+
 
     @property
     def api_key(self):
@@ -64,10 +67,10 @@ class NewPlacesDriverSpain:
 
         body = {
             'textQuery': text_query.format(postal_code, city, country),
-            'pageSize': str(page_size),
-            'includePureServiceAreaBusinesses': str(include_non_physical).lower(),
+            'pageSize': page_size,
+            'includePureServiceAreaBusinesses': True,
             'includedType': included_type,
-            'strictTypeFiltering': str(strict_filtering).lower(),
+            'strictTypeFiltering': strict_filtering,
             'languageCode': language
         }
         if token:
@@ -95,7 +98,10 @@ class NewPlacesDriverSpain:
         body = self.body(postal_code=zip_code, city=city, **kwargs)
         headers = self.headers()
         response = requests.post(url=self._TEXT_QUERY_BASE_URL, json=body, headers=headers)
-        self.logger.info(f'{len(response.json().get("places"))} places in zip code or sub_area: {zip_code}')
+        try:
+            self.logger.info(f'{len(response.json().get("places"))} places in zip code or sub_area: {zip_code}')
+        except TypeError:
+            self.logger.info(f'nothng found in {zip_code}')
         if response.json().get('places'):
             return dict(response.json())
         else:
@@ -110,13 +116,15 @@ class NewPlacesDriverSpain:
                 response = self.text_search_request(zip_code, city, token=token, **kwargs)
                 if response:
                     places += response['places']
-                token = response.get('nextPageToken', '')
-                n_places += len(response['places'])
+                    token = response.get('nextPageToken', '')
+                    n_places += len(response['places'])
                 if token:
                     self.logger.info(f'token found for zip code: {zip_code}')
                 else:
+                    self.logger.info(f'found {n_places} in {zip_code}')
+
                     if n_places == self._N_PLACES_FOUND_THEN_REPEAT:
-                        self.logger.info(f'found 60 places in zip code {zip_code}')
+                        pass
                     else:
                         break
 
@@ -182,23 +190,38 @@ class NewPlacesDriverSpain:
     def del_no_data_rows(self, df: pd.DataFrame) -> pd.DataFrame:
         i_rows = df.shape[0]
         mask = ((df['maps_phone'].isna() | (df['maps_phone'] == '')) & (df['url'].isna() | (df['url'] == '')))
-        self.deleted['by_no_maps_data'] = i_rows - df.shape[0]
         df = df[~mask]
+        self.deleted['by_no_maps_data'] = i_rows - df.shape[0]
         return df
 
     def del_bad_fit_names(self, df: pd.DataFrame):
+        i_rows = df.shape[0]
         mask = (df['name'].apply(self.remove_accents).str.contains('|'.join(self._BAD_FIT_NAMES), case=False, na=False))
-        self.deleted['by_bad_fit_name'] = len(mask)
         df = df[~mask]
+        self.deleted['by_bad_fit_name'] = i_rows - df.shape[0]
+
         return df
 
-    def create_csv(self, city, df: pd.DataFrame):
-        df.to_csv(f'../{self._COUNTRY}/{city.lower()}.csv', index=False)
+    def create_csv(self, city: str, df: pd.DataFrame, result_file_path: str = ''):
+        if not result_file_path:
+            root = os.path.dirname(os.path.abspath(__file__))
+            result_file_path = os.path.join(root, self._COUNTRY, f'{city.lower()}.csv')
+        df.to_csv(result_file_path, index=False)
 
     def del_not_operational(self, df: pd.DataFrame):
-        maks = (df['business_status'] != 'OPERATIONAL')
-        self.deleted['by_status'] = len(maks)
-        return df[~maks]
+        i_rows = df.shape[0]
+        maks = (df['business_status'] == 'OPERATIONAL')
+        df = df[maks]
+        self.deleted['by_status'] = i_rows - df.shape[0]
+        return df
+
+    def del_by_type(self, df: pd.DataFrame):
+        i_rows = df.shape[0]
+        mask = df['types'].apply(lambda x: isinstance(x, tuple) and x[0] == 'real_estate_agency' and
+                                           'travel_agency' not in x)
+        df = df[mask]
+        self.deleted['by_type'] = i_rows - df.shape[0]
+        return df
 
     def agencies_in_city(self, city, zip_codes: list[str], create_file: bool = True, secondary_city_name=''):
         places = self.full_text_search_request(city=city, zip_codes=zip_codes)
@@ -210,11 +233,12 @@ class NewPlacesDriverSpain:
         df = self.add_zc_equal_names(df)
         print(df.info)
         df = self.del_no_data_rows(df)
-        self.logger.info(f'deleted by miss match address: {self.deleted["by_address"]}')
-        self.logger.info(f'deleted by bad fit name: {self.deleted["by_bad_fit_name"]}')
-        self.logger.info(f'deleted by name and postal code repeated: {self.deleted["by_name_and_zc_rp"]}')
-        self.logger.info(f'deleted by no maps data: {self.deleted["by_no_maps_data"]}')
-        self.logger.info(f'delted by business status: {self.deleted["by_status"]}')
+        df = self.del_by_type(df)
+        df = self.del_not_operational(df)
+        df = self.del_bad_fit_names(df)
+        for key, val in self.deleted.items():
+            self.logger.info(f'deleted by {key}: {val}')
+
         if create_file:
             self.create_csv(city=city, df=df)
             self.logger.info(f'file created with name {city}')
@@ -223,5 +247,6 @@ class NewPlacesDriverSpain:
 
 print(NewPlacesDriverSpain.agency_dflt_format)
 driver = NewPlacesDriverSpain(_PLACES_API_KEY)
-zip_codes = ZipCodeScraper('Almería', provincia_zip_code='04').get_zip_codes()
-my_df = driver.agencies_in_city(city='Almería', zip_codes=zip_codes[:5])
+zip_codes = ZipCodeScraper('Illes Balears', provincia_zip_code='07').get_zip_codes()
+print(f'zip codes found: {len(zip_codes)}')
+my_df = driver.agencies_in_city(city='Illes Balears', zip_codes=zip_codes)

@@ -27,17 +27,60 @@ GET_SA_AI_SYSTEM_CONTENT = """You are my scraper assistant. I just need you to f
                        name of a person as representative. sociedad if you find a sl or s.l. and in case you do find it 
                        do not include sl nor s.l."""
 
-GET_CONTACTS_AI_SYSTEM_CONTENT = f"""You are my scraper assistant. You will receive markdown of webpages as json string.
-                              I will request you to get info to me from this pages. 
-                              Must return answer as a dict as follows 
-                              {{"phone_1": ,"phone_2: , "e-mail_1": ,"e-mail_2", "message": }},
-                              case 1: You find atleast one value for phone or email: return it and message: 'success'
-                              case 2:  you dont find a value for any key: return {open_ai_empty_return} ""                            
-                              where message can be "succes" if found or "error:" if couldnt find and inside brackets 
-                              short explanation of why couldnt find info. If there are many offices contacts return message:
-                              'too many offices, not giving contacts to avoid misunderstanding' and return all 
-                              "phone_1": ,"phone_2: , "e-mail_1": ,"e-mail_2" with empty string '', DO NOT RETURN VALUES 
-                              IN THIS CASE!"""
+GET_CONTACTS_AI_SYSTEM_CONTENT = f"""You are my scraper assistant. You will receive the content of a webpage as a markdown string (inside JSON)
+Your task is to extract contact information.
+
+You must ALWAYS return a Python dictionary with EXACTLY these keys:
+
+{{
+  "phone_1": "",
+  "phone_2": "",
+  "e-mail_1": "",
+  "e-mail_2": "",
+  "message": ""
+}}
+
+IMPORTANT RULES (follow strictly):
+
+1. ALWAYS return ALL 5 keys above, even if the values are empty.
+   - NEVER change key names.
+   - NEVER omit keys.
+   - NEVER rename keys.
+   - An empty value must be an empty string "".
+
+2. PHONE AND EMAIL EXTRACTION:
+   - If you find one or more phone numbers, put the first one in "phone_1" and the second one in "phone_2".
+   - If you find one or more emails, put the first one in "e-mail_1" and the second one in "e-mail_2".
+   - If fewer than two values exist, leave the rest as empty strings "".
+
+3. SUCCESS CASE:
+   - If at least ONE phone OR email is found, fill them normally and set:
+       "message": "success"
+
+4. NO CONTACT INFO CASE:
+   - If NO phones AND NO emails are found, return:
+       {{
+         "phone_1": "",
+         "phone_2": "",
+         "e-mail_1": "",
+         "e-mail_2": "",
+         "message": "error:no contact info found"
+       }}
+
+5. TOO MANY OFFICES CASE:
+   - If the page contains multiple offices/branches and it is ambiguous which contact info belongs to which:
+       - DO NOT return any phones or emails.
+       - Leave all fields empty strings "".
+       - Set:
+           "message": "error:too many offices, not giving contacts to avoid misunderstanding"
+
+6. OUTPUT FORMAT REQUIREMENTS:
+   - Output MUST be a valid JSON-like Python dictionary.
+   - Do NOT add extra fields.
+   - Do NOT add explanations outside the dictionary.
+   - Do NOT include notes, comments, markdown, or prose.
+   - Only return the dictionary.
+"""
 
 
 def get_contacts_ai_user_content(markdown: str) -> str:
