@@ -1,6 +1,6 @@
 import pandas as pd
 from config import logging_basic_config
-from llm_integration import open_ai_request, make_md, GET_CONTACTS_AI_SYSTEM_CONTENT, GET_SA_AI_SYSTEM_CONTENT, \
+from app.LLM.llm_integration import open_ai_request, make_md, GET_CONTACTS_AI_SYSTEM_CONTENT, GET_SA_AI_SYSTEM_CONTENT, \
     get_contacts_ai_user_content, get_sa_ai_user_content
 from app.scrapers.scrapers import get_contacts_url, default_options
 from selenium import webdriver

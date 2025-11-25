@@ -1,0 +1,10 @@
+.env
+junk/
+Italia/
+spain/
+monapart/
+remax/
+.idea/
+safti/
+.pytest_cache/
+tests/__pycache__/test_ai_fill_data.cpython-310-pytest-9.0.1.pyc
