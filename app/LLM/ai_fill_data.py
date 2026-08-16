@@ -10,13 +10,13 @@ import logging
 logger = logging.getLogger(__name__)
 logging.basicConfig(**logging_basic_config)
 
-def clear_duplicates(df: pd.DataFrame) -> None:
 
+def clear_duplicates(df: pd.DataFrame) -> None:
     phone_0 = 'maps_phone'
     phones = [phone_0, 'phone_1', 'phone_2']
     if all(phone in df.columns for phone in phones):
         cols = [phone_0, 'phone_1', 'phone_2']
-        df[cols] = df[cols].apply(lambda col: col.map(format_phone_number))
+        df[cols] = df[cols].apply(lambda row: row.map(format_phone_number))
         mask_1 = (df[phone_0] == df['phone_1']) | (df[phone_0] == df['phone_2'])
         df.loc[mask_1, phone_0] = ''
     else:
@@ -36,22 +36,23 @@ def validate_emails(email: str) -> bool:
         return False
 
 
-def validate_df_emails(df: pd.DataFrame, column: str) -> None:
+def validate_df_emails(df: pd.DataFrame, column: str) -> pd.Series:
     """checks in all emails in a dataframe column are in-place"""
     mask = ~df[column].apply(validate_emails)
     df.loc[mask, column] = ''
+    return df[column]
 
 
 def format_phone_number(number: str | int | float) -> str:
     if not number or number == 'nan':
         return ''
     number = number.strip().replace(' ', '').replace('(', '').replace(')', '').replace('-', '')
-    if not(str(number[0]) == '+' or str(number[:2]) == '00'):
+    if not (str(number[0]) == '+' or str(number[:2]) == '00'):
         number = '+34' + number
     return number
 
 
-def fill_data(csv_filepath: str,  file_name: str, from_row: int = 0, to_row: int = None):
+def fill_data(csv_filepath: str, file_name: str, from_row: int = 0, to_row: int = None):
     driver = webdriver.Chrome(options=default_options())
 
     if csv_filepath[-4:] != '.csv':
@@ -88,7 +89,6 @@ def fill_data(csv_filepath: str,  file_name: str, from_row: int = 0, to_row: int
         # )
         # Remove phone duplicates in-place
 
-
         # validate emails
 
         df_2.to_csv(
@@ -113,4 +113,22 @@ if __name__ == '__main__':
     # df = pd.read_csv('./enriched_dfs/araba.csv')
     # validate_df_emails(df, 'e-mail_1')
     # validate_df_emails(df, 'e-mail_2')
+    df = pd.read_csv('./enriched_dfs/baleares_team.csv')
+    print(df.shape[0])
+    df_2 = df.copy()
+    print(df_2[df_2['name'] == 'Inmobiliaria Buades. Mª Dolores Carballal Buades']['url'])
+    df_2 = df_2[df_2['url'] != '']
+    df_2 = df_2.dropna(subset=['url'])
+    df_2 = df_2.drop_duplicates(subset=['maps_phone', 'phone_1', 'phone_2', 'e-mail_1', 'e-mail_2'])
+    print(df_2.shape[0])
+    # print(df.shape[0] - df_2.shape[0])
+    # df_2.to_csv('./enriched_dfs/baleares_no_duplicates.csv', index=False)
+
+    df_2.to_csv('./enriched_dfs/baleares_no_duplicates_all_websites.csv', index=False)
+    df_2.loc[:,['name', 'address', 'maps_phone', 'url', 'comment', 'phone_1', 'phone_2', 'e-mail_1', 'e-mail_2']].to_csv(
+        './enriched_dfs/baleares_1.1_import.csv', index=False)
+    df_3 = df_2.iloc[:200]
+    df_3.to_csv('./enriched_dfs/baleares_import_chunk_1.csv', index=False)
+    # df_2 = df.iloc[:200]
+    # df_2.to_csv('./enriched_dfs/baleares_part_1', index=False)
     # df.to_csv('C:/Users/Jean/Desktop/prospeccion/app/LLM/enriched_dfs/araba_1.1.csv')

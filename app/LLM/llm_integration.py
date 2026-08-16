@@ -1,5 +1,4 @@
 import logging
-
 from openai import OpenAI
 from config import _OPEN_AI_PERSONAL_KEY, _SPIDER_API_KEY
 import requests

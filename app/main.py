@@ -26,8 +26,8 @@ class NewPlacesDriverSpain:
     _TEXT_QUERY_BASE_URL = 'https://places.googleapis.com/v1/places:searchText'
     _DFLT_KEY_VALUES = ('name', 'address', 'maps_phone', 'url', 'rating', 'reviews_count', 'language',
                         'comment', 'business_status', 'types')
-    _BAD_FIT_NAMES = ['alquiler', 'rent ', 'renta', 'rental', 'vacacional', 'vacaciones', 'holidays', 'mobile', 'industrial',
-                      'industriales', 'habitacion', 'apartamento']
+    _BAD_FIT_NAMES = ['alquiler', 'rent ', 'renta', 'rental', 'vacacional', 'vacaciones', 'holiday', 'mobile', 'industrial',
+                      'industrial', 'habitacion', 'apartamento']
     agency_dflt_format = {key: [] for key in _DFLT_KEY_VALUES}
 
     def __init__(self, api_key: str):
